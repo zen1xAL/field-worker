@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -35,7 +35,7 @@ const FILTER_OPTIONS: FilterOptionItem[] = [
 ];
 
 export const MapScreen = () => {
-  const { colors, spacing, typography, layout, radius } = useTheme();
+  const { colors, isDark, spacing, typography, layout, radius } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const mapRef = useRef<MapView | null>(null);
 
@@ -46,7 +46,10 @@ export const MapScreen = () => {
     location: { address: string; latitude: number; longitude: number };
   } => {
     const hasCoords =
-      task.location.latitude !== undefined && task.location.longitude !== undefined;
+      task.location.latitude !== undefined &&
+      task.location.longitude !== undefined &&
+      !isNaN(task.location.latitude) &&
+      !isNaN(task.location.longitude);
     if (!hasCoords) {
       return false;
     }
@@ -55,6 +58,50 @@ export const MapScreen = () => {
     }
     return task.status === filter;
   });
+
+  const totalTasksWithCoords = allTasks.filter(
+    (task): task is Task & {
+      location: { address: string; latitude: number; longitude: number };
+    } =>
+      task.location.latitude !== undefined &&
+      task.location.longitude !== undefined &&
+      !isNaN(task.location.latitude) &&
+      !isNaN(task.location.longitude)
+  );
+
+  const latestTaskWithCoords = totalTasksWithCoords[0];
+
+  const initialRegion: Region = latestTaskWithCoords
+    ? {
+        latitude: latestTaskWithCoords.location.latitude,
+        longitude: latestTaskWithCoords.location.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      }
+    : {
+        latitude: DEFAULT_MAP_REGION.latitude,
+        longitude: DEFAULT_MAP_REGION.longitude,
+        latitudeDelta: DEFAULT_MAP_REGION.latitudeDelta,
+        longitudeDelta: DEFAULT_MAP_REGION.longitudeDelta,
+      };
+
+  useEffect(() => {
+    if (tasksWithCoords.length > 0 && mapRef.current) {
+      const coords = tasksWithCoords.map((task) => ({
+        latitude: task.location.latitude,
+        longitude: task.location.longitude,
+      }));
+      mapRef.current.fitToCoordinates(coords, {
+        edgePadding: {
+          top: layout.minTapTarget + spacing.lg,
+          right: spacing.xl,
+          bottom: layout.minTapTarget + spacing.lg,
+          left: spacing.xl,
+        },
+        animated: true,
+      });
+    }
+  }, [tasksWithCoords.length, filter]);
 
   const getMarkerPinColor = (status: TaskStatus): string => {
     switch (status) {
@@ -70,20 +117,34 @@ export const MapScreen = () => {
   };
 
   const handleCenterMap = () => {
-    if (mapRef.current) {
-      const region: Region = {
-        latitude: DEFAULT_MAP_REGION.latitude,
-        longitude: DEFAULT_MAP_REGION.longitude,
-        latitudeDelta: DEFAULT_MAP_REGION.latitudeDelta,
-        longitudeDelta: DEFAULT_MAP_REGION.longitudeDelta,
-      };
-      mapRef.current.animateToRegion(region, 500);
+    if (!mapRef.current) {
+      return;
+    }
+    if (tasksWithCoords.length > 0) {
+      const coords = tasksWithCoords.map((task) => ({
+        latitude: task.location.latitude,
+        longitude: task.location.longitude,
+      }));
+      mapRef.current.fitToCoordinates(coords, {
+        edgePadding: {
+          top: layout.minTapTarget + spacing.lg,
+          right: spacing.xl,
+          bottom: layout.minTapTarget + spacing.lg,
+          left: spacing.xl,
+        },
+        animated: true,
+      });
+    } else {
+      mapRef.current.animateToRegion(initialRegion, 500);
     }
   };
 
   const handleCalloutPress = (taskId: string) => {
     navigation.navigate('TaskDetail', { taskId });
   };
+
+  const activeFilterLabel =
+    FILTER_OPTIONS.find((item) => item.key === filter)?.label ?? '';
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -114,7 +175,12 @@ export const MapScreen = () => {
         }
       />
 
-      <View style={[styles.filterBarWrapper, { paddingHorizontal: spacing.lg, paddingBottom: spacing.sm }]}>
+      <View
+        style={[
+          styles.filterBarWrapper,
+          { paddingHorizontal: spacing.lg, paddingBottom: spacing.sm },
+        ]}
+      >
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -160,19 +226,21 @@ export const MapScreen = () => {
           ref={mapRef}
           style={styles.map}
           mapType={Platform.OS === 'android' ? 'none' : 'standard'}
-          initialRegion={{
-            latitude: DEFAULT_MAP_REGION.latitude,
-            longitude: DEFAULT_MAP_REGION.longitude,
-            latitudeDelta: DEFAULT_MAP_REGION.latitudeDelta,
-            longitudeDelta: DEFAULT_MAP_REGION.longitudeDelta,
-          }}
+          initialRegion={initialRegion}
           showsCompass
           showsScale
         >
           <UrlTile
-            urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+            key={isDark ? 'dark-carto' : 'light-carto'}
+            urlTemplate={
+              isDark
+                ? 'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
+                : 'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png'
+            }
             maximumZ={19}
             flipY={false}
+            zIndex={1}
+            tileSize={256}
           />
           {tasksWithCoords.map((task) => (
             <Marker
@@ -193,7 +261,13 @@ export const MapScreen = () => {
         </MapView>
 
         {tasksWithCoords.length === 0 && (
-          <View
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => {
+              if (totalTasksWithCoords.length > 0) {
+                setFilter('All');
+              }
+            }}
             style={[
               styles.floatingEmptyBanner,
               {
@@ -219,9 +293,11 @@ export const MapScreen = () => {
                 flex: 1,
               }}
             >
-              Нет объектов с GPS координатами для отображения на карте. Выберите типовой объект при создании наряда.
+              {totalTasksWithCoords.length > 0
+                ? `В статусе «${activeFilterLabel}» нет объектов. Нажмите здесь, чтобы показать все ${totalTasksWithCoords.length} метки на карте.`
+                : 'Нет объектов с GPS-координатами. Выберите типовой объект или нажмите «GPS» при создании наряда.'}
             </Text>
-          </View>
+          </TouchableOpacity>
         )}
       </View>
     </View>
@@ -261,6 +337,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    elevation: 3,
   },
 });
