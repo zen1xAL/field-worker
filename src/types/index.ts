@@ -2,6 +2,17 @@ export type TaskStatus = 'New' | 'In Progress' | 'Completed' | 'Cancelled';
 
 export type SyncStatus = 'synced' | 'pending' | 'failed';
 
+export type OutboxActionType = 'CREATE' | 'UPDATE' | 'STATUS_CHANGE' | 'DELETE';
+
+export interface OutboxQueueItem {
+  id: string;
+  taskId: string;
+  actionType: OutboxActionType;
+  payload: Partial<Task>;
+  timestamp: string;
+  retryCount: number;
+}
+
 export interface TaskLocation {
   address: string;
   latitude?: number;

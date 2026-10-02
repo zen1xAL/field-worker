@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { STORAGE_KEYS } from '@/constants';
-import { HistoryLogItem, Task, ThemeMode } from '@/types';
+import { HistoryLogItem, OutboxQueueItem, Task, ThemeMode } from '@/types';
 
 export const storageService = {
   async getTasks(): Promise<Task[]> {
@@ -57,21 +57,36 @@ export const storageService = {
     } catch {}
   },
 
-  async getSyncQueue(): Promise<string[]> {
+  async getSyncQueue(): Promise<OutboxQueueItem[]> {
     try {
       const data = await AsyncStorage.getItem(STORAGE_KEYS.SYNC_QUEUE);
       if (!data) {
         return [];
       }
-      return JSON.parse(data) as string[];
+      return JSON.parse(data) as OutboxQueueItem[];
     } catch {
       return [];
     }
   },
 
-  async saveSyncQueue(queue: string[]): Promise<void> {
+  async saveSyncQueue(queue: OutboxQueueItem[]): Promise<void> {
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.SYNC_QUEUE, JSON.stringify(queue));
+    } catch {}
+  },
+
+  async getServerUrl(): Promise<string | null> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.SERVER_URL);
+      return data;
+    } catch {
+      return null;
+    }
+  },
+
+  async saveServerUrl(url: string): Promise<void> {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.SERVER_URL, url);
     } catch {}
   },
 };

@@ -7,10 +7,12 @@ import { store } from '@/store';
 import { RootNavigator } from '@/navigation';
 import { useTheme } from '@/hooks/useTheme';
 import { useAppInitialization } from '@/hooks/useAppInitialization';
+import { useNetworkMonitor } from '@/hooks/useNetworkMonitor';
 
 const AppContent = () => {
   const { isDark, colors } = useTheme();
   const { isReady } = useAppInitialization();
+  useNetworkMonitor();
 
   if (!isReady) {
     return (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAppSelector } from '@/store/hooks';
 import { selectFilteredAndSortedTasks, selectSearchQuery, selectFilterStatus } from '@/store/selectors/tasksSelectors';
 import { useTaskActions } from '@/hooks/useTaskActions';
+import { useSyncQueue } from '@/hooks/useSyncQueue';
 import { RootStackParamList } from '@/navigation/types';
 import { CANDIDATE_CODE, NETWORK_STATUS_LABELS } from '@/constants';
 import { Task, TaskStatus } from '@/types';
@@ -32,15 +33,10 @@ export const TaskListScreen = () => {
   const tasks = useAppSelector(selectFilteredAndSortedTasks);
   const searchQuery = useAppSelector(selectSearchQuery);
   const filterStatus = useAppSelector(selectFilterStatus);
-  const isOnline = useAppSelector((state) => state.sync.isOnline);
+  const { isOnline, isSyncing, outboxQueue, triggerSync } = useSyncQueue();
 
-  const [refreshing, setRefreshing] = useState(false);
-
-  const handleRefresh = () => {
-    setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 600);
+  const handleRefresh = async () => {
+    await triggerSync();
   };
 
   const handleCreatePress = () => {
@@ -72,13 +68,27 @@ export const TaskListScreen = () => {
         rightElement={
           <View style={[styles.headerActions, { gap: spacing.sm }]}>
             <AppBadge
-              label={isOnline ? NETWORK_STATUS_LABELS.online : NETWORK_STATUS_LABELS.offline}
-              variant={isOnline ? 'Completed' : 'Cancelled'}
+              label={
+                isSyncing
+                  ? 'Синхронизация...'
+                  : isOnline
+                  ? NETWORK_STATUS_LABELS.online
+                  : outboxQueue.length > 0
+                  ? `Автономно (${outboxQueue.length})`
+                  : NETWORK_STATUS_LABELS.offline
+              }
+              variant={isSyncing ? 'In Progress' : isOnline ? 'Completed' : 'Cancelled'}
               icon={
                 <Ionicons
-                  name={isOnline ? 'wifi' : 'wifi-outline'}
+                  name={isSyncing ? 'sync' : isOnline ? 'wifi' : 'wifi-outline'}
                   size={layout.iconSmall - 2}
-                  color={isOnline ? colors.statusCompleted : colors.statusCancelled}
+                  color={
+                    isSyncing
+                      ? colors.statusInProgress
+                      : isOnline
+                      ? colors.statusCompleted
+                      : colors.statusCancelled
+                  }
                 />
               }
             />
@@ -122,7 +132,7 @@ export const TaskListScreen = () => {
         ]}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
+            refreshing={isSyncing}
             onRefresh={handleRefresh}
             tintColor={colors.primary}
             colors={[colors.primary]}

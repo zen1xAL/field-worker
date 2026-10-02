@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setTasks } from '@/store/slices/tasksSlice';
 import { setHistory } from '@/store/slices/historySlice';
 import { setThemeMode } from '@/store/slices/themeSlice';
+import { setOutboxQueue, setServerUrl } from '@/store/slices/syncSlice';
 import { storageService } from '@/services';
 import { NotificationService } from '@/services/notificationService';
 
@@ -13,17 +14,21 @@ export const useAppInitialization = () => {
   const tasks = useAppSelector((state) => state.tasks.items);
   const history = useAppSelector((state) => state.history.items);
   const themeMode = useAppSelector((state) => state.theme.mode);
+  const outboxQueue = useAppSelector((state) => state.sync.outboxQueue);
 
   useEffect(() => {
     let isMounted = true;
 
     const initialize = async () => {
-      const [savedTasks, savedHistory, savedTheme] = await Promise.all([
-        storageService.getTasks(),
-        storageService.getHistory(),
-        storageService.getTheme(),
-        NotificationService.initialize(),
-      ]);
+      const [savedTasks, savedHistory, savedTheme, savedQueue, savedServerUrl] =
+        await Promise.all([
+          storageService.getTasks(),
+          storageService.getHistory(),
+          storageService.getTheme(),
+          storageService.getSyncQueue(),
+          storageService.getServerUrl(),
+          NotificationService.initialize(),
+        ]);
 
       if (!isMounted) {
         return;
@@ -37,6 +42,12 @@ export const useAppInitialization = () => {
       }
       if (savedTheme) {
         dispatch(setThemeMode(savedTheme));
+      }
+      if (savedQueue.length > 0) {
+        dispatch(setOutboxQueue(savedQueue));
+      }
+      if (savedServerUrl) {
+        dispatch(setServerUrl(savedServerUrl));
       }
 
       setIsReady(true);
@@ -69,6 +80,13 @@ export const useAppInitialization = () => {
     }
     storageService.saveTheme(themeMode);
   }, [themeMode, isReady]);
+
+  useEffect(() => {
+    if (!isReady) {
+      return;
+    }
+    storageService.saveSyncQueue(outboxQueue);
+  }, [outboxQueue, isReady]);
 
   return { isReady };
 };

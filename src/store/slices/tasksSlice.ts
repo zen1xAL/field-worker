@@ -71,6 +71,36 @@ export const tasksSlice = createSlice({
       }
       task.syncStatus = action.payload.syncStatus;
     },
+    mergeTasksWithLWW: (state, action: PayloadAction<Task[]>) => {
+      const remoteTasks = action.payload;
+      const remoteMap = new Map(remoteTasks.map((t) => [t.id, t]));
+
+      state.items = state.items.map((localTask) => {
+        const remoteTask = remoteMap.get(localTask.id);
+        if (!remoteTask) {
+          return localTask;
+        }
+        remoteMap.delete(localTask.id);
+
+        const remoteTime = new Date(remoteTask.updatedAt).getTime();
+        const localTime = new Date(localTask.updatedAt).getTime();
+
+        if (remoteTime > localTime) {
+          return {
+            ...remoteTask,
+            syncStatus: 'synced',
+          };
+        }
+        return localTask;
+      });
+
+      remoteMap.forEach((newRemoteTask) => {
+        state.items.unshift({
+          ...newRemoteTask,
+          syncStatus: 'synced',
+        });
+      });
+    },
     setSortOptions: (state, action: PayloadAction<TaskSortOptions>) => {
       state.sortOptions = action.payload;
     },
@@ -90,6 +120,7 @@ export const {
   deleteTask,
   setTaskStatus,
   setTaskSyncStatus,
+  mergeTasksWithLWW,
   setSortOptions,
   setFilterStatus,
   setSearchQuery,

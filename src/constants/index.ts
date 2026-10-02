@@ -7,7 +7,10 @@ export const STORAGE_KEYS = {
   HISTORY: '@field_worker/history',
   THEME: '@field_worker/theme',
   SYNC_QUEUE: '@field_worker/sync_queue',
+  SERVER_URL: '@field_worker/server_url',
 } as const;
+
+export const DEFAULT_SERVER_URL = 'http://192.168.10.128:3000';
 
 export const NOTIFICATION_CONFIG = {
   STANDARD_OFFSET_MINUTES: 30,
