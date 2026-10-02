@@ -18,18 +18,25 @@ export const ScreenHeader = ({
   showBackButton = false,
   onBackPress,
 }: ScreenHeaderProps) => {
-  const { colors, spacing, typography } = useTheme();
+  const { colors, spacing, typography, layout } = useTheme();
 
   return (
     <View style={[styles.container, { paddingHorizontal: spacing.lg, paddingVertical: spacing.md }]}>
       <View style={styles.leftGroup}>
         {showBackButton && (
           <TouchableOpacity
-            style={[styles.backButton, { marginRight: spacing.sm }]}
+            style={[
+              styles.backButton,
+              {
+                width: layout.minTapTarget,
+                height: layout.minTapTarget,
+                marginRight: spacing.sm,
+              },
+            ]}
             onPress={onBackPress}
             activeOpacity={0.7}
           >
-            <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
+            <Ionicons name="arrow-back" size={layout.iconLarge} color={colors.textPrimary} />
           </TouchableOpacity>
         )}
         <View style={styles.titleGroup}>
@@ -61,7 +68,11 @@ export const ScreenHeader = ({
           )}
         </View>
       </View>
-      {rightElement && <View style={styles.rightGroup}>{rightElement}</View>}
+      {rightElement && (
+        <View style={[styles.rightGroup, { marginLeft: spacing.md }]}>
+          {rightElement}
+        </View>
+      )}
     </View>
   );
 };
@@ -85,12 +96,8 @@ const styles = StyleSheet.create({
   },
   subtitle: {},
   backButton: {
-    width: 44,
-    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  rightGroup: {
-    marginLeft: 12,
-  },
+  rightGroup: {},
 });

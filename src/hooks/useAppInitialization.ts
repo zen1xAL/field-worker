@@ -4,6 +4,7 @@ import { setTasks } from '@/store/slices/tasksSlice';
 import { setHistory } from '@/store/slices/historySlice';
 import { setThemeMode } from '@/store/slices/themeSlice';
 import { storageService } from '@/services';
+import { NotificationService } from '@/services/notificationService';
 
 export const useAppInitialization = () => {
   const dispatch = useAppDispatch();
@@ -21,6 +22,7 @@ export const useAppInitialization = () => {
         storageService.getTasks(),
         storageService.getHistory(),
         storageService.getTheme(),
+        NotificationService.initialize(),
       ]);
 
       if (!isMounted) {

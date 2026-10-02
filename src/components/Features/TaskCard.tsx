@@ -42,6 +42,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       onPress={() => onPress(task)}
       style={[
         styles.cardContainer,
+        { marginVertical: spacing.xs },
         isOverdue && { borderColor: colors.danger, borderWidth: 1 },
       ]}
     >
@@ -159,6 +160,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             style={[
               styles.quickButton,
               {
+                minHeight: layout.minTapTarget,
                 backgroundColor: task.status === 'New' ? colors.primaryLight : colors.statusCompletedBg,
                 borderRadius: radius.md,
                 paddingVertical: spacing.sm,
@@ -193,9 +195,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 };
 
 const styles = StyleSheet.create({
-  cardContainer: {
-    marginVertical: 4,
-  },
+  cardContainer: {},
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -227,7 +227,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 36,
   },
   quickButtonText: {},
 });

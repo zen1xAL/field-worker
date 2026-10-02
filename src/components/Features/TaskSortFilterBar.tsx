@@ -5,8 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Modal,
-  TouchableWithoutFeedback,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
@@ -22,48 +20,9 @@ import {
   selectSortOptions,
   selectTaskStats,
 } from '@/store/selectors/tasksSelectors';
-import { TaskSortBy, TaskSortOrder, TaskStatus } from '@/types';
+import { TaskStatus } from '@/types';
 import { AppInput } from '@/components/UI/AppInput';
-
-interface SortOptionItem {
-  id: string;
-  label: string;
-  by: TaskSortBy;
-  order: TaskSortOrder;
-}
-
-const SORT_OPTIONS: SortOptionItem[] = [
-  {
-    id: 'dueDate-asc',
-    label: 'Дедлайн: сначала срочные',
-    by: 'dueDate',
-    order: 'asc',
-  },
-  {
-    id: 'dueDate-desc',
-    label: 'Дедлайн: сначала дальние',
-    by: 'dueDate',
-    order: 'desc',
-  },
-  {
-    id: 'createdAt-desc',
-    label: 'Создание: сначала новые',
-    by: 'createdAt',
-    order: 'desc',
-  },
-  {
-    id: 'createdAt-asc',
-    label: 'Создание: сначала старые',
-    by: 'createdAt',
-    order: 'asc',
-  },
-  {
-    id: 'status-asc',
-    label: 'По статусу выполнения',
-    by: 'status',
-    order: 'asc',
-  },
-];
+import { TaskSortModal, SortOptionItem } from './TaskSortModal';
 
 type FilterTabKey = TaskStatus | 'All';
 
@@ -123,11 +82,6 @@ export const TaskSortFilterBar = () => {
     }
   };
 
-  const activeSortLabel =
-    SORT_OPTIONS.find(
-      (opt) => opt.by === sortOptions.by && opt.order === sortOptions.order
-    )?.label ?? 'Сортировка';
-
   return (
     <View style={[styles.container, { paddingHorizontal: spacing.lg, paddingBottom: spacing.sm }]}>
       <View style={[styles.searchRow, { gap: spacing.sm, marginBottom: spacing.sm }]}>
@@ -146,7 +100,10 @@ export const TaskSortFilterBar = () => {
             }
             rightIcon={
               searchQuery.length > 0 ? (
-                <TouchableOpacity onPress={handleClearSearch} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <TouchableOpacity
+                  onPress={handleClearSearch}
+                  hitSlop={{ top: spacing.sm, bottom: spacing.sm, left: spacing.sm, right: spacing.sm }}
+                >
                   <Ionicons
                     name="close-circle"
                     size={layout.iconSmall + 2}
@@ -167,8 +124,8 @@ export const TaskSortFilterBar = () => {
               backgroundColor: colors.surface,
               borderColor: colors.border,
               borderRadius: radius.md,
+              width: layout.minTapTarget,
               height: layout.minTapTarget,
-              paddingHorizontal: spacing.md,
             },
           ]}
         >
@@ -197,6 +154,7 @@ export const TaskSortFilterBar = () => {
               style={[
                 styles.tabChip,
                 {
+                  height: layout.minTapTarget,
                   borderRadius: radius.md,
                   paddingHorizontal: spacing.md,
                   backgroundColor: isActive ? colors.primary : colors.surface,
@@ -249,97 +207,13 @@ export const TaskSortFilterBar = () => {
         })}
       </ScrollView>
 
-      <Modal
+      <TaskSortModal
         visible={isSortModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setIsSortModalVisible(false)}
-      >
-        <TouchableWithoutFeedback onPress={() => setIsSortModalVisible(false)}>
-          <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0, 0, 0, 0.45)' }]}>
-            <TouchableWithoutFeedback>
-              <View
-                style={[
-                  styles.modalContent,
-                  {
-                    backgroundColor: colors.surface,
-                    borderRadius: radius.lg,
-                    padding: spacing.lg,
-                  },
-                ]}
-              >
-                <View style={[styles.modalHeader, { marginBottom: spacing.md }]}>
-                  <Text
-                    style={[
-                      styles.modalTitle,
-                      {
-                        color: colors.textPrimary,
-                        fontSize: typography.fontSizes.titleSmall,
-                        fontWeight: typography.fontWeights.semiBold,
-                      },
-                    ]}
-                  >
-                    Порядок сортировки
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => setIsSortModalVisible(false)}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  >
-                    <Ionicons
-                      name="close"
-                      size={layout.iconMedium}
-                      color={colors.textSecondary}
-                    />
-                  </TouchableOpacity>
-                </View>
-
-                {SORT_OPTIONS.map((opt) => {
-                  const isSelected =
-                    sortOptions.by === opt.by && sortOptions.order === opt.order;
-
-                  return (
-                    <TouchableOpacity
-                      key={opt.id}
-                      activeOpacity={0.7}
-                      onPress={() => handleSortSelect(opt)}
-                      style={[
-                        styles.sortOptionRow,
-                        {
-                          paddingVertical: spacing.md,
-                          borderBottomWidth: 1,
-                          borderBottomColor: colors.border,
-                        },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.sortOptionText,
-                          {
-                            color: isSelected ? colors.primary : colors.textPrimary,
-                            fontSize: typography.fontSizes.body,
-                            fontWeight: isSelected
-                              ? typography.fontWeights.semiBold
-                              : typography.fontWeights.regular,
-                          },
-                        ]}
-                      >
-                        {opt.label}
-                      </Text>
-                      {isSelected && (
-                        <Ionicons
-                          name="checkmark"
-                          size={layout.iconMedium}
-                          color={colors.primary}
-                        />
-                      )}
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+        activeBy={sortOptions.by}
+        activeOrder={sortOptions.order}
+        onSelectOption={handleSortSelect}
+        onClose={() => setIsSortModalVisible(false)}
+      />
     </View>
   );
 };
@@ -365,37 +239,14 @@ const styles = StyleSheet.create({
   tabChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 38,
     borderWidth: 1,
   },
   tabLabel: {},
   countBadge: {
-    paddingVertical: 1,
+    paddingVertical: 2,
     minWidth: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
   countText: {},
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  modalContent: {
-    width: '100%',
-    maxWidth: 380,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalTitle: {},
-  sortOptionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  sortOptionText: {},
 });

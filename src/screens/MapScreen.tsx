@@ -16,13 +16,17 @@ import { selectTasksItems } from '@/store/selectors/tasksSelectors';
 import { RootStackParamList } from '@/navigation/types';
 import { DEFAULT_MAP_REGION } from '@/constants';
 import { Task, TaskStatus } from '@/types';
-import { formatTaskDateTime } from '@/utils/dateTime';
 import { ScreenHeader } from '@/components/UI/ScreenHeader';
-import { AppBadge } from '@/components/UI/AppBadge';
+import { MapCalloutCard } from '@/components/Features/MapCalloutCard';
 
 type MapFilterStatus = TaskStatus | 'All';
 
-const FILTER_OPTIONS: { key: MapFilterStatus; label: string }[] = [
+interface FilterOptionItem {
+  key: MapFilterStatus;
+  label: string;
+}
+
+const FILTER_OPTIONS: FilterOptionItem[] = [
   { key: 'All', label: 'Все объекты' },
   { key: 'New', label: 'Новые' },
   { key: 'In Progress', label: 'В работе' },
@@ -125,6 +129,7 @@ export const MapScreen = () => {
                 style={[
                   styles.filterChip,
                   {
+                    height: layout.minTapTarget,
                     borderRadius: radius.md,
                     paddingHorizontal: spacing.md,
                     backgroundColor: isActive ? colors.primary : colors.surface,
@@ -174,69 +179,7 @@ export const MapScreen = () => {
               description={task.location.address}
             >
               <Callout tooltip onPress={() => handleCalloutPress(task.id)}>
-                <View
-                  style={[
-                    styles.calloutCard,
-                    {
-                      backgroundColor: colors.surface,
-                      borderRadius: radius.md,
-                      padding: spacing.md,
-                      borderColor: colors.border,
-                    },
-                  ]}
-                >
-                  <View style={[styles.calloutHeader, { marginBottom: spacing.xs }]}>
-                    <AppBadge label={task.status} variant={task.status} />
-                  </View>
-
-                  <Text
-                    style={[
-                      styles.calloutTitle,
-                      {
-                        color: colors.textPrimary,
-                        fontSize: typography.fontSizes.bodyMedium,
-                        fontWeight: typography.fontWeights.bold,
-                        marginBottom: 2,
-                      },
-                    ]}
-                  >
-                    {task.title}
-                  </Text>
-
-                  <Text
-                    style={[
-                      styles.calloutAddress,
-                      {
-                        color: colors.textSecondary,
-                        fontSize: typography.fontSizes.caption,
-                        marginBottom: spacing.xs,
-                      },
-                    ]}
-                  >
-                    {task.location.address}
-                  </Text>
-
-                  <View style={styles.calloutFooter}>
-                    <Text
-                      style={{
-                        color: colors.textMuted,
-                        fontSize: typography.fontSizes.captionSmall,
-                      }}
-                    >
-                      {formatTaskDateTime(task.dueDate)}
-                    </Text>
-
-                    <Text
-                      style={{
-                        color: colors.primary,
-                        fontSize: typography.fontSizes.captionSmall,
-                        fontWeight: typography.fontWeights.semiBold,
-                      }}
-                    >
-                      Открыть →
-                    </Text>
-                  </View>
-                </View>
+                <MapCalloutCard task={task} />
               </Callout>
             </Marker>
           ))}
@@ -247,6 +190,7 @@ export const MapScreen = () => {
             style={[
               styles.floatingEmptyBanner,
               {
+                bottom: spacing.xl,
                 backgroundColor: colors.surface,
                 borderRadius: radius.md,
                 padding: spacing.md,
@@ -292,7 +236,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   filterChip: {
-    height: 38,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -304,27 +247,8 @@ const styles = StyleSheet.create({
   map: {
     ...StyleSheet.absoluteFill,
   },
-  calloutCard: {
-    width: 240,
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  calloutHeader: {},
-  calloutTitle: {},
-  calloutAddress: {},
-  calloutFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 4,
-  },
   floatingEmptyBanner: {
     position: 'absolute',
-    bottom: 20,
     left: 0,
     right: 0,
     flexDirection: 'row',

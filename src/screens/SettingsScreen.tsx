@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Switch, Alert } from 'react-n
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
 import { useAppSelector } from '@/store/hooks';
-import { CANDIDATE_CODE } from '@/constants';
+import { CANDIDATE_CODE, NETWORK_STATUS_LABELS } from '@/constants';
 import { NotificationService } from '@/services/notificationService';
 import { ScreenHeader, AppCard, AppBadge } from '@/components/UI';
 
@@ -166,7 +166,7 @@ export const SettingsScreen = () => {
               </View>
             </View>
             <AppBadge
-              label={isOnline ? 'Online' : 'Offline'}
+              label={isOnline ? NETWORK_STATUS_LABELS.online : NETWORK_STATUS_LABELS.offline}
               variant={isOnline ? 'synced' : 'pending'}
             />
           </View>

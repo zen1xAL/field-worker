@@ -11,7 +11,7 @@ import { useTheme } from '@/hooks/useTheme';
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export const BottomTabNavigator = () => {
-  const { colors } = useTheme();
+  const { colors, layout, spacing, typography } = useTheme();
 
   return (
     <Tab.Navigator
@@ -20,15 +20,15 @@ export const BottomTabNavigator = () => {
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 6,
+          height: layout.tabBarHeight,
+          paddingBottom: spacing.sm,
+          paddingTop: spacing.xs + 2,
         },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '600',
+          fontSize: typography.fontSizes.captionSmall,
+          fontWeight: typography.fontWeights.semiBold,
         },
       }}
     >

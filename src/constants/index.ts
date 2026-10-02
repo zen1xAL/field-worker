@@ -1,4 +1,4 @@
-import { ThemeMode } from '@/types';
+import { SyncStatus, TaskStatus, ThemeMode } from '@/types';
 
 export const CANDIDATE_CODE = 'SA-RN-2026-X1';
 
@@ -52,6 +52,11 @@ export const LAYOUT = {
   iconHero: 48,
   tabBarHeight: 60,
   headerHeight: 56,
+  calloutWidth: 240,
+  photoThumbnailSize: 76,
+  deleteBadgeSize: 22,
+  timePickerWidth: 120,
+  multilineInputHeight: 96,
 } as const;
 
 export const TYPOGRAPHY = {
@@ -78,6 +83,24 @@ export const TYPOGRAPHY = {
     relaxed: 24,
     loose: 28,
   },
+} as const;
+
+export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
+  New: 'Новый',
+  'In Progress': 'В работе',
+  Completed: 'Завершен',
+  Cancelled: 'Отменен',
+} as const;
+
+export const SYNC_STATUS_LABELS: Record<SyncStatus, string> = {
+  synced: 'Синхронизировано',
+  pending: 'Ожидает',
+  failed: 'Сбой',
+} as const;
+
+export const NETWORK_STATUS_LABELS = {
+  online: 'В сети',
+  offline: 'Автономно',
 } as const;
 
 export const PREDEFINED_LOCATIONS = [
@@ -140,6 +163,8 @@ export const THEME_COLORS = {
     danger: '#DC2626',
     dangerBg: 'rgba(220, 38, 38, 0.12)',
     white: '#FFFFFF',
+    modalOverlay: 'rgba(0, 0, 0, 0.45)',
+    shadowColor: '#0F172A',
   },
   dark: {
     background: '#0F172A',
@@ -167,6 +192,8 @@ export const THEME_COLORS = {
     danger: '#EF4444',
     dangerBg: 'rgba(239, 68, 68, 0.2)',
     white: '#FFFFFF',
+    modalOverlay: 'rgba(0, 0, 0, 0.65)',
+    shadowColor: '#000000',
   },
 } as const;
 

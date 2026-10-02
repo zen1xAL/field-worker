@@ -17,58 +17,69 @@ import { ScreenHeader } from '@/components/UI/ScreenHeader';
 import { AppCard } from '@/components/UI/AppCard';
 import { AppBadge } from '@/components/UI/AppBadge';
 
-const ACTION_CONFIG: Record<
-  HistoryActionType,
-  { label: string; iconName: keyof typeof Ionicons.glyphMap; color: string; bg: string }
-> = {
-  CREATE: {
-    label: 'Создание',
-    iconName: 'add-circle-outline',
-    color: '#059669',
-    bg: 'rgba(5, 150, 105, 0.12)',
-  },
-  STATUS_CHANGE: {
-    label: 'Статус',
-    iconName: 'sync-outline',
-    color: '#D97706',
-    bg: 'rgba(217, 119, 6, 0.12)',
-  },
-  EDIT: {
-    label: 'Правка',
-    iconName: 'create-outline',
-    color: '#2563EB',
-    bg: 'rgba(37, 99, 235, 0.12)',
-  },
-  ATTACHMENT_ADD: {
-    label: 'Вложение (+)',
-    iconName: 'image-outline',
-    color: '#7C3AED',
-    bg: 'rgba(124, 58, 237, 0.12)',
-  },
-  ATTACHMENT_REMOVE: {
-    label: 'Вложение (-)',
-    iconName: 'trash-outline',
-    color: '#DC2626',
-    bg: 'rgba(220, 38, 38, 0.12)',
-  },
-  DELETE: {
-    label: 'Удаление',
-    iconName: 'close-circle-outline',
-    color: '#DC2626',
-    bg: 'rgba(220, 38, 38, 0.12)',
-  },
-  SYNC: {
-    label: 'Синхронизация',
-    iconName: 'cloud-done-outline',
-    color: '#059669',
-    bg: 'rgba(5, 150, 105, 0.12)',
-  },
-};
-
 export const HistoryScreen = () => {
   const { colors, spacing, typography, layout, radius } = useTheme();
   const dispatch = useAppDispatch();
   const historyItems = useAppSelector((state) => state.history.items);
+
+  const getActionConfig = (actionType: HistoryActionType): {
+    label: string;
+    iconName: keyof typeof Ionicons.glyphMap;
+    color: string;
+    bg: string;
+  } => {
+    switch (actionType) {
+      case 'CREATE':
+        return {
+          label: 'Создание',
+          iconName: 'add-circle-outline',
+          color: colors.statusCompleted,
+          bg: colors.statusCompletedBg,
+        };
+      case 'STATUS_CHANGE':
+        return {
+          label: 'Статус',
+          iconName: 'sync-outline',
+          color: colors.statusInProgress,
+          bg: colors.statusInProgressBg,
+        };
+      case 'EDIT':
+        return {
+          label: 'Правка',
+          iconName: 'create-outline',
+          color: colors.primary,
+          bg: colors.primaryLight,
+        };
+      case 'ATTACHMENT_ADD':
+        return {
+          label: 'Вложение (+)',
+          iconName: 'image-outline',
+          color: colors.primary,
+          bg: colors.primaryLight,
+        };
+      case 'ATTACHMENT_REMOVE':
+        return {
+          label: 'Вложение (-)',
+          iconName: 'trash-outline',
+          color: colors.danger,
+          bg: colors.dangerBg,
+        };
+      case 'DELETE':
+        return {
+          label: 'Удаление',
+          iconName: 'close-circle-outline',
+          color: colors.danger,
+          bg: colors.dangerBg,
+        };
+      case 'SYNC':
+        return {
+          label: 'Синхронизация',
+          iconName: 'cloud-done-outline',
+          color: colors.syncSynced,
+          bg: colors.statusCompletedBg,
+        };
+    }
+  };
 
   const handleClearHistory = () => {
     Alert.alert(
@@ -86,12 +97,7 @@ export const HistoryScreen = () => {
   };
 
   const renderHistoryItem = ({ item }: { item: HistoryLogItem }) => {
-    const config = ACTION_CONFIG[item.actionType] ?? {
-      label: item.actionType,
-      iconName: 'information-circle-outline',
-      color: colors.textSecondary,
-      bg: colors.surfaceSecondary,
-    };
+    const config = getActionConfig(item.actionType);
 
     return (
       <AppCard style={[styles.historyCard, { marginBottom: spacing.sm }]}>
@@ -129,7 +135,7 @@ export const HistoryScreen = () => {
               color: colors.textPrimary,
               fontSize: typography.fontSizes.body,
               fontWeight: typography.fontWeights.medium,
-              marginBottom: 2,
+              marginBottom: spacing.xs / 2,
             },
           ]}
         >
@@ -206,7 +212,16 @@ export const HistoryScreen = () => {
           },
         ]}
         ListEmptyComponent={
-          <AppCard style={styles.emptyCard}>
+          <AppCard
+            style={[
+              styles.emptyCard,
+              {
+                paddingVertical: spacing.xxxl,
+                paddingHorizontal: spacing.xl,
+                marginTop: spacing.xl,
+              },
+            ]}
+          >
             <Ionicons
               name="time-outline"
               size={layout.iconHero}
@@ -270,9 +285,6 @@ const styles = StyleSheet.create({
   emptyCard: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 36,
-    paddingHorizontal: 20,
-    marginTop: 20,
   },
   emptyTitle: {
     textAlign: 'center',

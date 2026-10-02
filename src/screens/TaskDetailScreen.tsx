@@ -43,7 +43,7 @@ export const TaskDetailScreen = () => {
           showBackButton
           onBackPress={() => navigation.goBack()}
         />
-        <View style={[styles.notFoundContainer, { padding: spacing.xl }]}>
+        <View style={[styles.notFoundContainer, { padding: spacing.xl, marginTop: spacing.xxxl * 2 }]}>
           <Ionicons
             name="alert-circle-outline"
             size={layout.iconHero}
@@ -296,7 +296,7 @@ export const TaskDetailScreen = () => {
                   style={{
                     color: colors.textMuted,
                     fontSize: typography.fontSizes.caption,
-                    marginTop: 2,
+                    marginTop: spacing.xs / 2,
                   }}
                 >
                   Плановое время прибытия и выполнения
@@ -357,7 +357,7 @@ export const TaskDetailScreen = () => {
                   style={{
                     color: colors.textMuted,
                     fontSize: typography.fontSizes.caption,
-                    marginTop: 2,
+                    marginTop: spacing.xs / 2,
                   }}
                 >
                   GPS: {task.location.latitude.toFixed(4)}, {task.location.longitude.toFixed(4)}
@@ -470,7 +470,6 @@ const styles = StyleSheet.create({
   notFoundContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 60,
   },
   notFoundTitle: {},
   notFoundText: {},

@@ -30,6 +30,7 @@ export const AttachmentPickerSection: React.FC<AttachmentPickerSectionProps> = (
 }) => {
   const { colors, spacing, typography, radius, layout } = useTheme();
   const [selectedPhotoUri, setSelectedPhotoUri] = useState<string | null>(null);
+  const [failedImageIds, setFailedImageIds] = useState<Record<string, boolean>>({});
 
   const handleCameraPress = async () => {
     const attachment = await MediaService.capturePhoto();
@@ -43,6 +44,10 @@ export const AttachmentPickerSection: React.FC<AttachmentPickerSectionProps> = (
     if (attachment) {
       onAddAttachment(attachment);
     }
+  };
+
+  const handleImageError = (id: string) => {
+    setFailedImageIds((prev) => ({ ...prev, [id]: true }));
   };
 
   return (
@@ -65,7 +70,7 @@ export const AttachmentPickerSection: React.FC<AttachmentPickerSectionProps> = (
       {!readOnly && (
         <View style={[styles.buttonsRow, { gap: spacing.sm, marginBottom: spacing.sm }]}>
           <AppButton
-            title="Камера"
+            title="Снять фото"
             variant="secondary"
             icon={
               <Ionicons
@@ -79,7 +84,7 @@ export const AttachmentPickerSection: React.FC<AttachmentPickerSectionProps> = (
           />
 
           <AppButton
-            title="Галерея"
+            title="Из галереи"
             variant="secondary"
             icon={
               <Ionicons
@@ -123,7 +128,7 @@ export const AttachmentPickerSection: React.FC<AttachmentPickerSectionProps> = (
           >
             {readOnly
               ? 'К этому наряду фотоотчет пока не прикреплен'
-              : 'Сделайте фото с объекта или добавьте снимок из галереи'}
+              : 'Сделайте снимок с объекта или добавьте фото из галереи'}
           </Text>
         </View>
       ) : (
@@ -132,45 +137,77 @@ export const AttachmentPickerSection: React.FC<AttachmentPickerSectionProps> = (
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={[styles.thumbnailsList, { gap: spacing.sm }]}
         >
-          {attachments.map((item) => (
-            <View key={item.id} style={styles.thumbnailWrapper}>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => setSelectedPhotoUri(item.uri)}
-                style={[
-                  styles.imageContainer,
-                  {
-                    borderRadius: radius.md,
-                    borderColor: colors.border,
-                    backgroundColor: colors.surfaceSecondary,
-                  },
-                ]}
-              >
-                <Image
-                  source={{ uri: item.uri }}
-                  style={[styles.thumbnailImage, { borderRadius: radius.md }]}
-                  resizeMode="cover"
-                />
-              </TouchableOpacity>
+          {attachments.map((item) => {
+            const hasError = failedImageIds[item.id];
 
-              {!readOnly && (
+            return (
+              <View key={item.id} style={styles.thumbnailWrapper}>
                 <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => onRemoveAttachment(item.id)}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  activeOpacity={0.8}
+                  onPress={() => {
+                    if (!hasError) {
+                      setSelectedPhotoUri(item.uri);
+                    }
+                  }}
                   style={[
-                    styles.deleteBadge,
+                    styles.imageContainer,
                     {
-                      backgroundColor: colors.danger,
-                      borderRadius: radius.full,
+                      width: layout.photoThumbnailSize,
+                      height: layout.photoThumbnailSize,
+                      borderRadius: radius.md,
+                      borderColor: colors.border,
+                      backgroundColor: colors.surfaceSecondary,
                     },
                   ]}
                 >
-                  <Ionicons name="close" size={14} color={colors.white} />
+                  {hasError ? (
+                    <View style={styles.fallbackContainer}>
+                      <Ionicons
+                        name="alert-circle-outline"
+                        size={layout.iconMedium}
+                        color={colors.danger}
+                      />
+                      <Text
+                        style={{
+                          color: colors.danger,
+                          fontSize: typography.fontSizes.captionSmall,
+                          marginTop: 2,
+                        }}
+                      >
+                        Сбой
+                      </Text>
+                    </View>
+                  ) : (
+                    <Image
+                      source={{ uri: item.uri }}
+                      style={[styles.thumbnailImage, { borderRadius: radius.md }]}
+                      resizeMode="cover"
+                      onError={() => handleImageError(item.id)}
+                    />
+                  )}
                 </TouchableOpacity>
-              )}
-            </View>
-          ))}
+
+                {!readOnly && (
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() => onRemoveAttachment(item.id)}
+                    hitSlop={{ top: spacing.sm, bottom: spacing.sm, left: spacing.sm, right: spacing.sm }}
+                    style={[
+                      styles.deleteBadge,
+                      {
+                        width: layout.deleteBadgeSize,
+                        height: layout.deleteBadgeSize,
+                        backgroundColor: colors.danger,
+                        borderRadius: radius.full,
+                      },
+                    ]}
+                  >
+                    <Ionicons name="close" size={14} color={colors.white} />
+                  </TouchableOpacity>
+                )}
+              </View>
+            );
+          })}
         </ScrollView>
       )}
 
@@ -180,13 +217,13 @@ export const AttachmentPickerSection: React.FC<AttachmentPickerSectionProps> = (
         animationType="fade"
         onRequestClose={() => setSelectedPhotoUri(null)}
       >
-        <View style={styles.fullscreenModalContainer}>
+        <View style={[styles.fullscreenModalContainer, { backgroundColor: colors.modalOverlay }]}>
           <TouchableOpacity
             style={[styles.closePreviewButton, { top: spacing.xxl, right: spacing.lg }]}
             onPress={() => setSelectedPhotoUri(null)}
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            hitSlop={{ top: spacing.md, bottom: spacing.md, left: spacing.md, right: spacing.md }}
           >
-            <Ionicons name="close-circle" size={36} color="#FFFFFF" />
+            <Ionicons name="close-circle" size={36} color={colors.white} />
           </TouchableOpacity>
 
           {selectedPhotoUri && (
@@ -223,10 +260,14 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   imageContainer: {
-    width: 76,
-    height: 76,
     borderWidth: 1,
     overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fallbackContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   thumbnailImage: {
     width: '100%',
@@ -236,14 +277,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -4,
     right: -4,
-    width: 22,
-    height: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },
   fullscreenModalContainer: {
     flex: 1,
-    backgroundColor: '#000000',
     alignItems: 'center',
     justifyContent: 'center',
   },

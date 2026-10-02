@@ -133,7 +133,7 @@ export const DateTimePickerField: React.FC<DateTimePickerFieldProps> = ({
               borderRadius: radius.md,
               height: layout.minTapTarget,
               paddingHorizontal: spacing.md,
-              width: 120,
+              width: layout.timePickerWidth,
             },
           ]}
         >

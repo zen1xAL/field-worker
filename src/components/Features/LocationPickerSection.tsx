@@ -187,7 +187,7 @@ export const LocationPickerSection: React.FC<LocationPickerSectionProps> = ({
         onRequestClose={() => setIsModalVisible(false)}
       >
         <TouchableWithoutFeedback onPress={() => setIsModalVisible(false)}>
-          <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0, 0, 0, 0.45)' }]}>
+          <View style={[styles.modalOverlay, { backgroundColor: colors.modalOverlay }]}>
             <TouchableWithoutFeedback>
               <View
                 style={[

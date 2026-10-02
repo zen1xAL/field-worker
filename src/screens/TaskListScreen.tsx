@@ -15,7 +15,7 @@ import { useAppSelector } from '@/store/hooks';
 import { selectFilteredAndSortedTasks, selectSearchQuery, selectFilterStatus } from '@/store/selectors/tasksSelectors';
 import { useTaskActions } from '@/hooks/useTaskActions';
 import { RootStackParamList } from '@/navigation/types';
-import { CANDIDATE_CODE } from '@/constants';
+import { CANDIDATE_CODE, NETWORK_STATUS_LABELS } from '@/constants';
 import { Task, TaskStatus } from '@/types';
 import { ScreenHeader } from '@/components/UI/ScreenHeader';
 import { AppButton } from '@/components/UI/AppButton';
@@ -72,7 +72,7 @@ export const TaskListScreen = () => {
         rightElement={
           <View style={[styles.headerActions, { gap: spacing.sm }]}>
             <AppBadge
-              label={isOnline ? 'Online' : 'Offline'}
+              label={isOnline ? NETWORK_STATUS_LABELS.online : NETWORK_STATUS_LABELS.offline}
               variant={isOnline ? 'Completed' : 'Cancelled'}
               icon={
                 <Ionicons
@@ -129,7 +129,16 @@ export const TaskListScreen = () => {
           />
         }
         ListEmptyComponent={
-          <AppCard style={styles.emptyContainer}>
+          <AppCard
+            style={[
+              styles.emptyContainer,
+              {
+                paddingVertical: spacing.xxxl,
+                paddingHorizontal: spacing.xl,
+                marginTop: spacing.xl,
+              },
+            ]}
+          >
             <Ionicons
               name={searchQuery.length > 0 ? 'search-outline' : 'clipboard-outline'}
               size={layout.iconHero}
@@ -201,9 +210,6 @@ const styles = StyleSheet.create({
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 36,
-    paddingHorizontal: 20,
-    marginTop: 20,
   },
   emptyTitle: {
     textAlign: 'center',

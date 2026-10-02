@@ -163,7 +163,7 @@ export const CreateEditTaskScreen = () => {
               required
               multiline
               numberOfLines={4}
-              style={{ minHeight: 96, textAlignVertical: 'top' }}
+              style={{ minHeight: layout.multilineInputHeight, textAlignVertical: 'top' }}
               containerStyle={{ marginBottom: spacing.sm }}
             />
           </AppCard>
