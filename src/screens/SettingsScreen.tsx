@@ -8,15 +8,15 @@ import { NotificationService } from '@/services/notificationService';
 import { ScreenHeader, AppCard, AppBadge } from '@/components/UI';
 
 export const SettingsScreen = () => {
-  const { colors, isDark, toggleTheme, spacing, typography } = useTheme();
+  const { colors, isDark, toggleTheme, spacing, typography, layout } = useTheme();
   const isOnline = useAppSelector((state) => state.sync.isOnline);
 
-  const handleDemoNotificationPress = async () => {
-    const notificationId = await NotificationService.triggerDemoReminder('Тестовое напоминание мастера');
+  const handleTestNotificationPress = async () => {
+    const notificationId = await NotificationService.triggerTestReminder('Проверка службы нарядов');
     if (notificationId) {
       Alert.alert(
-        'Демо-уведомление запланировано',
-        'Тестовое напоминание поступит ровно через 30 секунд для проверки на видео.'
+        'Оповещение запланировано',
+        'Служебное уведомление поступит на устройство через 30 секунд для проверки канала связи.'
       );
     } else {
       Alert.alert(
@@ -184,15 +184,19 @@ export const SettingsScreen = () => {
               },
             ]}
           >
-            ОТЛАДКА И ТЕСТИРОВАНИЕ
+            СЛУЖБА ОПОВЕЩЕНИЙ И СВЯЗИ
           </Text>
           <TouchableOpacity
             style={styles.actionRow}
-            onPress={handleDemoNotificationPress}
+            onPress={handleTestNotificationPress}
             activeOpacity={0.7}
           >
             <View style={styles.rowInfo}>
-              <Ionicons name="notifications-outline" size={22} color={colors.primary} />
+              <Ionicons
+                name="notifications-outline"
+                size={layout.iconMedium}
+                color={colors.primary}
+              />
               <View style={[styles.rowTextGroup, { marginLeft: spacing.md }]}>
                 <Text
                   style={[
@@ -204,7 +208,7 @@ export const SettingsScreen = () => {
                     },
                   ]}
                 >
-                  Демо-пуш через 30 сек
+                  Тестовое оповещение наряда
                 </Text>
                 <Text
                   style={[
@@ -216,11 +220,15 @@ export const SettingsScreen = () => {
                     },
                   ]}
                 >
-                  Для проверки уведомления на видео-демо
+                  Проверка доставки служебного уведомления (30 сек)
                 </Text>
               </View>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            <Ionicons
+              name="chevron-forward"
+              size={layout.iconMedium}
+              color={colors.textMuted}
+            />
           </TouchableOpacity>
         </AppCard>
       </View>

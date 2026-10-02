@@ -11,7 +11,7 @@ export const STORAGE_KEYS = {
 
 export const NOTIFICATION_CONFIG = {
   STANDARD_OFFSET_MINUTES: 30,
-  DEMO_DELAY_SECONDS: 30,
+  TEST_NOTIFICATION_DELAY_SECONDS: 30,
   CHANNEL_ID: 'field-worker-task-reminders',
   CHANNEL_NAME: 'Напоминания о выездах',
 } as const;

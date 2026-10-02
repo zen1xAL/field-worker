@@ -111,12 +111,12 @@ export const TaskDetailScreen = () => {
     changeStatus(task.id, newStatus);
   };
 
-  const handleTriggerDemoReminder = async () => {
-    const notificationId = await NotificationService.triggerDemoReminder(task.title);
+  const handleTriggerTestReminder = async () => {
+    const notificationId = await NotificationService.triggerTestReminder(task.title);
     if (notificationId) {
       Alert.alert(
-        'Демо-уведомление запланировано',
-        'Локальное пуш-уведомление поступит ровно через 30 секунд для проверки доставки.'
+        'Оповещение запланировано',
+        'Служебное уведомление по наряду поступит на устройство через 30 секунд для проверки канала связи.'
       );
     } else {
       Alert.alert(
@@ -305,9 +305,9 @@ export const TaskDetailScreen = () => {
             </View>
 
             <AppButton
-              title="Проверить пуш-уведомление (Демо 30с)"
+              title="Проверить доставку оповещения"
               variant="secondary"
-              onPress={handleTriggerDemoReminder}
+              onPress={handleTriggerTestReminder}
               icon={
                 <Ionicons
                   name="notifications-outline"

@@ -5,8 +5,9 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Platform,
 } from 'react-native';
-import MapView, { Marker, Callout, Region } from 'react-native-maps';
+import MapView, { Marker, Callout, Region, UrlTile } from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -158,6 +159,7 @@ export const MapScreen = () => {
         <MapView
           ref={mapRef}
           style={styles.map}
+          mapType={Platform.OS === 'android' ? 'none' : 'standard'}
           initialRegion={{
             latitude: DEFAULT_MAP_REGION.latitude,
             longitude: DEFAULT_MAP_REGION.longitude,
@@ -167,6 +169,11 @@ export const MapScreen = () => {
           showsCompass
           showsScale
         >
+          <UrlTile
+            urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+            maximumZ={19}
+            flipY={false}
+          />
           {tasksWithCoords.map((task) => (
             <Marker
               key={task.id}

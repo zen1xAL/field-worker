@@ -102,19 +102,19 @@ export class NotificationService {
     }
   }
 
-  public static async triggerDemoReminder(taskTitle: string): Promise<string | null> {
+  public static async triggerTestReminder(taskTitle: string): Promise<string | null> {
     try {
       await this.initialize();
 
       const notificationId = await scheduleNotificationAsync({
         content: {
-          title: `[ДЕМО 30с] Напоминание по задаче`,
-          body: `Наряд: «${taskTitle}». Проверка доставки локального уведомления.`,
+          title: `Оповещение наряда: ${taskTitle}`,
+          body: `Служебное напоминание для выездного специалиста. Канал связи активен.`,
           sound: 'default',
         },
         trigger: {
           type: SchedulableTriggerInputTypes.TIME_INTERVAL,
-          seconds: NOTIFICATION_CONFIG.DEMO_DELAY_SECONDS,
+          seconds: NOTIFICATION_CONFIG.TEST_NOTIFICATION_DELAY_SECONDS,
         },
       });
 

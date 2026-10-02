@@ -7,7 +7,9 @@ import {
   Modal,
   FlatList,
   TouchableWithoutFeedback,
+  ActivityIndicator,
 } from 'react-native';
+import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
 import { PREDEFINED_LOCATIONS } from '@/constants';
@@ -28,9 +30,13 @@ export const LocationPickerSection: React.FC<LocationPickerSectionProps> = ({
 }) => {
   const { colors, spacing, typography, radius, layout } = useTheme();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [showCoordinates, setShowCoordinates] = useState(
-    Boolean(location.latitude && location.longitude)
-  );
+  const [isLocating, setIsLocating] = useState(false);
+
+  const hasCoords =
+    location.latitude !== undefined &&
+    location.longitude !== undefined &&
+    !isNaN(location.latitude) &&
+    !isNaN(location.longitude);
 
   const handleAddressTextChange = (text: string) => {
     onChangeLocation({
@@ -45,23 +51,61 @@ export const LocationPickerSection: React.FC<LocationPickerSectionProps> = ({
       latitude: item.latitude,
       longitude: item.longitude,
     });
-    setShowCoordinates(true);
     setIsModalVisible(false);
   };
 
-  const handleLatitudeChange = (text: string) => {
-    const parsed = parseFloat(text);
-    onChangeLocation({
-      ...location,
-      latitude: isNaN(parsed) ? undefined : parsed,
-    });
+  const handleGetCurrentLocation = async () => {
+    try {
+      setIsLocating(true);
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setIsLocating(false);
+        return;
+      }
+
+      const position = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      let resolvedAddress = location.address.trim();
+
+      try {
+        const [geo] = await Location.reverseGeocodeAsync({
+          latitude: lat,
+          longitude: lng,
+        });
+
+        if (geo) {
+          const parts = [geo.street, geo.streetNumber, geo.city].filter(Boolean);
+          if (parts.length > 0) {
+            resolvedAddress = parts.join(', ');
+          }
+        }
+      } catch {
+        if (!resolvedAddress) {
+          resolvedAddress = `Координаты: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        }
+      }
+
+      onChangeLocation({
+        address: resolvedAddress || `Координаты: ${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+        latitude: lat,
+        longitude: lng,
+      });
+    } catch {
+      return;
+    } finally {
+      setIsLocating(false);
+    }
   };
 
-  const handleLongitudeChange = (text: string) => {
-    const parsed = parseFloat(text);
+  const handleClearCoords = () => {
     onChangeLocation({
       ...location,
-      longitude: isNaN(parsed) ? undefined : parsed,
+      latitude: undefined,
+      longitude: undefined,
     });
   };
 
@@ -89,7 +133,7 @@ export const LocationPickerSection: React.FC<LocationPickerSectionProps> = ({
         leftIcon={
           <Ionicons
             name="location-outline"
-            size={layout.iconSmall + 2}
+            size={layout.iconSmall + spacing.xs}
             color={colors.primary}
           />
         }
@@ -97,7 +141,7 @@ export const LocationPickerSection: React.FC<LocationPickerSectionProps> = ({
 
       <View style={[styles.actionsRow, { gap: spacing.sm, marginTop: spacing.xs }]}>
         <AppButton
-          title="Справочник типовых объектов"
+          title="Справочник объектов"
           variant="secondary"
           icon={
             <Ionicons
@@ -112,71 +156,90 @@ export const LocationPickerSection: React.FC<LocationPickerSectionProps> = ({
 
         <TouchableOpacity
           activeOpacity={0.7}
-          onPress={() => setShowCoordinates(!showCoordinates)}
+          disabled={isLocating}
+          onPress={handleGetCurrentLocation}
           style={[
-            styles.toggleCoordsButton,
+            styles.gpsButton,
             {
               backgroundColor: colors.surfaceSecondary,
+              borderColor: colors.border,
               borderRadius: radius.md,
               height: layout.minTapTarget,
               paddingHorizontal: spacing.md,
             },
           ]}
         >
-          <Ionicons
-            name={showCoordinates ? 'navigate' : 'navigate-outline'}
-            size={layout.iconMedium}
-            color={colors.textSecondary}
-          />
+          {isLocating ? (
+            <ActivityIndicator size="small" color={colors.primary} />
+          ) : (
+            <View style={[styles.gpsContent, { gap: spacing.xs }]}>
+              <Ionicons
+                name="navigate"
+                size={layout.iconSmall}
+                color={colors.primary}
+              />
+              <Text
+                style={{
+                  color: colors.primary,
+                  fontSize: typography.fontSizes.bodySmall,
+                  fontWeight: typography.fontWeights.medium,
+                }}
+              >
+                GPS
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 
-      {showCoordinates && (
+      {hasCoords && (
         <View
           style={[
-            styles.coordinatesContainer,
+            styles.coordsBadgeContainer,
             {
               backgroundColor: colors.surfaceSecondary,
               borderRadius: radius.md,
-              padding: spacing.md,
+              borderColor: colors.border,
+              paddingVertical: spacing.sm,
+              paddingHorizontal: spacing.md,
               marginTop: spacing.sm,
+              gap: spacing.sm,
             },
           ]}
         >
+          <Ionicons
+            name="checkmark-circle"
+            size={layout.iconSmall}
+            color={colors.statusCompleted}
+          />
           <Text
             style={[
-              styles.coordsLabel,
+              styles.coordsBadgeText,
               {
                 color: colors.textSecondary,
                 fontSize: typography.fontSizes.caption,
                 fontWeight: typography.fontWeights.medium,
-                marginBottom: spacing.xs,
+                flex: 1,
               },
             ]}
           >
-            GPS Координаты (для карты)
+            GPS зафиксирован: {location.latitude?.toFixed(4)}, {location.longitude?.toFixed(4)}
           </Text>
-
-          <View style={[styles.coordsInputsRow, { gap: spacing.sm }]}>
-            <View style={{ flex: 1 }}>
-              <AppInput
-                placeholder="Широта (Lat)"
-                value={location.latitude !== undefined ? String(location.latitude) : ''}
-                onChangeText={handleLatitudeChange}
-                keyboardType="numeric"
-                containerStyle={{ marginBottom: 0 }}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <AppInput
-                placeholder="Долгота (Lng)"
-                value={location.longitude !== undefined ? String(location.longitude) : ''}
-                onChangeText={handleLongitudeChange}
-                keyboardType="numeric"
-                containerStyle={{ marginBottom: 0 }}
-              />
-            </View>
-          </View>
+          <TouchableOpacity
+            onPress={handleClearCoords}
+            hitSlop={{
+              top: spacing.sm,
+              bottom: spacing.sm,
+              left: spacing.sm,
+              right: spacing.sm,
+            }}
+          >
+            <Ionicons
+              name="close-circle"
+              size={layout.iconSmall + spacing.xs}
+              color={colors.textMuted}
+            />
+          </TouchableOpacity>
         </View>
       )}
 
@@ -215,7 +278,12 @@ export const LocationPickerSection: React.FC<LocationPickerSectionProps> = ({
                   </Text>
                   <TouchableOpacity
                     onPress={() => setIsModalVisible(false)}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    hitSlop={{
+                      top: spacing.sm,
+                      bottom: spacing.sm,
+                      left: spacing.sm,
+                      right: spacing.sm,
+                    }}
                   >
                     <Ionicons
                       name="close"
@@ -241,9 +309,19 @@ export const LocationPickerSection: React.FC<LocationPickerSectionProps> = ({
                         },
                       ]}
                     >
-                      <View style={[styles.predefinedIconCircle, { backgroundColor: colors.primaryLight, borderRadius: radius.full, padding: spacing.xs, marginRight: spacing.md }]}>
+                      <View
+                        style={[
+                          styles.predefinedIconCircle,
+                          {
+                            backgroundColor: colors.primaryLight,
+                            borderRadius: radius.full,
+                            padding: spacing.xs,
+                            marginRight: spacing.md,
+                          },
+                        ]}
+                      >
                         <Ionicons
-                          name="location"
+                          name="business"
                           size={layout.iconSmall}
                           color={colors.primary}
                         />
@@ -267,7 +345,7 @@ export const LocationPickerSection: React.FC<LocationPickerSectionProps> = ({
                             {
                               color: colors.textSecondary,
                               fontSize: typography.fontSizes.bodySmall,
-                              marginTop: 2,
+                              marginTop: spacing.xs,
                             },
                           ]}
                         >
@@ -293,16 +371,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  toggleCoordsButton: {
+  gpsButton: {
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
   },
-  coordinatesContainer: {},
-  coordsLabel: {},
-  coordsInputsRow: {
+  gpsContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+  coordsBadgeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  coordsBadgeText: {},
   modalOverlay: {
     flex: 1,
     justifyContent: 'flex-end',
