@@ -10,11 +10,13 @@ import {
 } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
 
-interface AppInputProps extends TextInputProps {
-  label: string;
+export interface AppInputProps extends TextInputProps {
+  label?: string;
   error?: string;
   containerStyle?: StyleProp<ViewStyle>;
   required?: boolean;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
 }
 
 export const AppInput = ({
@@ -22,6 +24,8 @@ export const AppInput = ({
   error,
   containerStyle,
   required = false,
+  leftIcon,
+  rightIcon,
   style,
   ...props
 }: AppInputProps) => {
@@ -40,54 +44,78 @@ export const AppInput = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      <View style={styles.labelRow}>
-        <Text
-          style={[
-            styles.label,
-            {
-              color: colors.textSecondary,
-              fontSize: typography.fontSizes.bodySmall,
-              fontWeight: typography.fontWeights.medium,
-              marginBottom: spacing.xs,
-            },
-          ]}
-        >
-          {label}
-        </Text>
-        {required && (
+      {label && (
+        <View style={styles.labelRow}>
           <Text
             style={[
-              styles.requiredAsterisk,
+              styles.label,
               {
-                color: colors.danger,
+                color: colors.textSecondary,
                 fontSize: typography.fontSizes.bodySmall,
-                marginLeft: spacing.xs,
+                fontWeight: typography.fontWeights.medium,
+                marginBottom: spacing.xs,
               },
             ]}
           >
-            *
+            {label}
           </Text>
-        )}
-      </View>
-      <TextInput
+          {required && (
+            <Text
+              style={[
+                styles.requiredAsterisk,
+                {
+                  color: colors.danger,
+                  fontSize: typography.fontSizes.bodySmall,
+                  marginLeft: spacing.xs,
+                },
+              ]}
+            >
+              *
+            </Text>
+          )}
+        </View>
+      )}
+
+      <View
         style={[
-          styles.input,
+          styles.inputWrapper,
           {
             backgroundColor: colors.surface,
             borderColor: getBorderColor(),
             borderRadius: radius.md,
-            color: colors.textPrimary,
-            fontSize: typography.fontSizes.body,
-            paddingHorizontal: spacing.md,
-            paddingVertical: props.multiline ? spacing.md : spacing.sm,
           },
-          style,
         ]}
-        placeholderTextColor={colors.textMuted}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        {...props}
-      />
+      >
+        {leftIcon && (
+          <View style={[styles.iconContainer, { paddingLeft: spacing.md }]}>
+            {leftIcon}
+          </View>
+        )}
+
+        <TextInput
+          style={[
+            styles.input,
+            {
+              color: colors.textPrimary,
+              fontSize: typography.fontSizes.body,
+              paddingHorizontal: spacing.md,
+              paddingVertical: props.multiline ? spacing.md : spacing.sm,
+            },
+            style,
+          ]}
+          placeholderTextColor={colors.textMuted}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          {...props}
+        />
+
+        {rightIcon && (
+          <View style={[styles.iconContainer, { paddingRight: spacing.md }]}>
+            {rightIcon}
+          </View>
+        )}
+      </View>
+
       {error && (
         <Text
           style={[
@@ -116,9 +144,18 @@ const styles = StyleSheet.create({
   },
   label: {},
   requiredAsterisk: {},
-  input: {
-    minHeight: 48,
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
+    minHeight: 48,
+  },
+  iconContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  input: {
+    flex: 1,
   },
   errorText: {
     fontWeight: '500',

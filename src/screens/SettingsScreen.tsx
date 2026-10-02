@@ -4,17 +4,26 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
 import { useAppSelector } from '@/store/hooks';
 import { CANDIDATE_CODE } from '@/constants';
+import { NotificationService } from '@/services/notificationService';
 import { ScreenHeader, AppCard, AppBadge } from '@/components/UI';
 
 export const SettingsScreen = () => {
   const { colors, isDark, toggleTheme, spacing, typography } = useTheme();
   const isOnline = useAppSelector((state) => state.sync.isOnline);
 
-  const handleDemoNotificationPress = () => {
-    Alert.alert(
-      'Демо-уведомление',
-      'Тестовое напоминание будет запланировано через 30 секунд для проверки на видео.'
-    );
+  const handleDemoNotificationPress = async () => {
+    const notificationId = await NotificationService.triggerDemoReminder('Тестовое напоминание мастера');
+    if (notificationId) {
+      Alert.alert(
+        'Демо-уведомление запланировано',
+        'Тестовое напоминание поступит ровно через 30 секунд для проверки на видео.'
+      );
+    } else {
+      Alert.alert(
+        'Уведомления отключены',
+        'Проверьте системные разрешения на показ уведомлений в настройках устройства.'
+      );
+    }
   };
 
   return (

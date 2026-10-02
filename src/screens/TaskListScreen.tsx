@@ -1,65 +1,184 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  RefreshControl,
+  TouchableOpacity,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
+import { useAppSelector } from '@/store/hooks';
+import { selectFilteredAndSortedTasks, selectSearchQuery, selectFilterStatus } from '@/store/selectors/tasksSelectors';
+import { useTaskActions } from '@/hooks/useTaskActions';
 import { RootStackParamList } from '@/navigation/types';
-import { ScreenHeader, AppCard, AppButton } from '@/components/UI';
+import { CANDIDATE_CODE } from '@/constants';
+import { Task, TaskStatus } from '@/types';
+import { ScreenHeader } from '@/components/UI/ScreenHeader';
+import { AppButton } from '@/components/UI/AppButton';
+import { AppCard } from '@/components/UI/AppCard';
+import { AppBadge } from '@/components/UI/AppBadge';
+import { TaskCard } from '@/components/Features/TaskCard';
+import { TaskSortFilterBar } from '@/components/Features/TaskSortFilterBar';
 
 export const TaskListScreen = () => {
-  const { colors, spacing, typography } = useTheme();
+  const { colors, spacing, typography, layout, radius } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { changeStatus } = useTaskActions();
+
+  const tasks = useAppSelector(selectFilteredAndSortedTasks);
+  const searchQuery = useAppSelector(selectSearchQuery);
+  const filterStatus = useAppSelector(selectFilterStatus);
+  const isOnline = useAppSelector((state) => state.sync.isOnline);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 600);
+  };
 
   const handleCreatePress = () => {
     navigation.navigate('CreateEditTask', {});
+  };
+
+  const handleTaskPress = (task: Task) => {
+    navigation.navigate('TaskDetail', { taskId: task.id });
+  };
+
+  const handleQuickAdvanceStatus = (task: Task) => {
+    let nextStatus: TaskStatus | null = null;
+    if (task.status === 'New') {
+      nextStatus = 'In Progress';
+    } else if (task.status === 'In Progress') {
+      nextStatus = 'Completed';
+    }
+
+    if (nextStatus) {
+      changeStatus(task.id, nextStatus);
+    }
   };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScreenHeader
         title="Задачи на смену"
-        subtitle="Учет выездов и назначенных объектов"
+        subtitle={`Код специалиста: ${CANDIDATE_CODE}`}
         rightElement={
-          <AppButton
-            title=""
-            icon={<Ionicons name="add" size={24} color={colors.white} />}
-            onPress={handleCreatePress}
-            style={styles.addButton}
-          />
+          <View style={[styles.headerActions, { gap: spacing.sm }]}>
+            <AppBadge
+              label={isOnline ? 'Online' : 'Offline'}
+              variant={isOnline ? 'Completed' : 'Cancelled'}
+              icon={
+                <Ionicons
+                  name={isOnline ? 'wifi' : 'wifi-outline'}
+                  size={layout.iconSmall - 2}
+                  color={isOnline ? colors.statusCompleted : colors.statusCancelled}
+                />
+              }
+            />
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={handleCreatePress}
+              style={[
+                styles.headerAddButton,
+                {
+                  backgroundColor: colors.primary,
+                  borderRadius: radius.md,
+                  width: layout.minTapTarget,
+                  height: layout.minTapTarget,
+                },
+              ]}
+            >
+              <Ionicons name="add" size={layout.iconLarge} color={colors.white} />
+            </TouchableOpacity>
+          </View>
         }
       />
 
-      <View style={[styles.content, { paddingHorizontal: spacing.lg, paddingTop: spacing.md }]}>
-        <AppCard style={styles.emptyCard}>
-          <Ionicons name="clipboard-outline" size={48} color={colors.textMuted} />
-          <Text
-            style={[
-              styles.emptyTitle,
-              {
-                color: colors.textPrimary,
-                fontSize: typography.fontSizes.titleSmall,
-                fontWeight: typography.fontWeights.semiBold,
-                marginTop: spacing.md,
-              },
-            ]}
-          >
-            Нет активных задач
-          </Text>
-          <Text
-            style={[
-              styles.emptyDescription,
-              {
-                color: colors.textSecondary,
-                fontSize: typography.fontSizes.body,
-                marginTop: spacing.xs + 2,
-              },
-            ]}
-          >
-            Нажмите кнопку создания, чтобы добавить первый наряд на выезд.
-          </Text>
-        </AppCard>
-      </View>
+      <TaskSortFilterBar />
+
+      <FlatList
+        data={tasks}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <TaskCard
+            task={item}
+            onPress={handleTaskPress}
+            onQuickAdvanceStatus={handleQuickAdvanceStatus}
+          />
+        )}
+        contentContainerStyle={[
+          styles.listContent,
+          {
+            paddingHorizontal: spacing.lg,
+            paddingBottom: spacing.xxxl,
+          },
+        ]}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+          />
+        }
+        ListEmptyComponent={
+          <AppCard style={styles.emptyContainer}>
+            <Ionicons
+              name={searchQuery.length > 0 ? 'search-outline' : 'clipboard-outline'}
+              size={layout.iconHero}
+              color={colors.textMuted}
+              style={{ marginBottom: spacing.md }}
+            />
+            <Text
+              style={[
+                styles.emptyTitle,
+                {
+                  color: colors.textPrimary,
+                  fontSize: typography.fontSizes.titleSmall,
+                  fontWeight: typography.fontWeights.semiBold,
+                  marginBottom: spacing.xs,
+                },
+              ]}
+            >
+              {searchQuery.length > 0
+                ? 'Наряды не найдены'
+                : filterStatus !== 'All'
+                ? `Нет нарядов в статусе «${filterStatus}»`
+                : 'Список нарядов пуст'}
+            </Text>
+            <Text
+              style={[
+                styles.emptySubtitle,
+                {
+                  color: colors.textSecondary,
+                  fontSize: typography.fontSizes.body,
+                  lineHeight: typography.lineHeights.normal,
+                  marginBottom: spacing.lg,
+                },
+              ]}
+            >
+              {searchQuery.length > 0
+                ? 'Попробуйте изменить поисковый запрос или сбросить фильтры'
+                : 'Создайте первый рабочий наряд для учета задач и геопозиции на смене.'}
+            </Text>
+
+            {searchQuery.length === 0 && filterStatus === 'All' && (
+              <AppButton
+                title="Создать наряд"
+                onPress={handleCreatePress}
+                icon={<Ionicons name="add-circle-outline" size={layout.iconMedium} color={colors.white} />}
+              />
+            )}
+          </AppCard>
+        }
+      />
     </View>
   );
 };
@@ -68,23 +187,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  addButton: {
-    width: 48,
-    height: 48,
-    paddingHorizontal: 0,
-    paddingVertical: 0,
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  content: {
-    flex: 1,
-  },
-  emptyCard: {
+  headerAddButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 32,
   },
-  emptyTitle: {},
-  emptyDescription: {
+  listContent: {
+    flexGrow: 1,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 36,
+    paddingHorizontal: 20,
+    marginTop: 20,
+  },
+  emptyTitle: {
     textAlign: 'center',
-    lineHeight: 20,
+  },
+  emptySubtitle: {
+    textAlign: 'center',
   },
 });

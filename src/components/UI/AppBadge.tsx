@@ -1,24 +1,37 @@
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
 import { TaskStatus, SyncStatus } from '@/types';
 
-type BadgeVariant =
+export type BadgeVariant =
   | TaskStatus
   | SyncStatus
   | 'neutral'
-  | 'primary';
+  | 'primary'
+  | 'danger';
 
-interface AppBadgeProps {
+export interface AppBadgeProps {
   label: string;
   variant?: BadgeVariant;
   icon?: React.ReactNode;
+  customColor?: string;
+  customBackgroundColor?: string;
 }
 
-export const AppBadge = ({ label, variant = 'neutral', icon }: AppBadgeProps) => {
+export const AppBadge = ({
+  label,
+  variant = 'neutral',
+  icon,
+  customColor,
+  customBackgroundColor,
+}: AppBadgeProps) => {
   const { colors, spacing, radius, typography } = useTheme();
 
   const getColors = (): { bg: string; text: string } => {
+    if (customBackgroundColor && customColor) {
+      return { bg: customBackgroundColor, text: customColor };
+    }
+
     switch (variant) {
       case 'New':
         return { bg: colors.statusNewBg, text: colors.statusNew };
@@ -36,6 +49,8 @@ export const AppBadge = ({ label, variant = 'neutral', icon }: AppBadgeProps) =>
         return { bg: colors.dangerBg, text: colors.syncFailed };
       case 'primary':
         return { bg: colors.primaryLight, text: colors.primary };
+      case 'danger':
+        return { bg: colors.dangerBg, text: colors.danger };
       case 'neutral':
       default:
         return { bg: colors.surfaceSecondary, text: colors.textSecondary };
