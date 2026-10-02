@@ -23,6 +23,53 @@ export const DEFAULT_MAP_REGION = {
   longitudeDelta: 0.12,
 } as const;
 
+export const SPACING = {
+  none: 0,
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+  xxxl: 32,
+} as const;
+
+export const RADIUS = {
+  none: 0,
+  xs: 4,
+  sm: 6,
+  md: 8,
+  lg: 12,
+  xl: 16,
+  full: 9999,
+} as const;
+
+export const TYPOGRAPHY = {
+  fontSizes: {
+    captionSmall: 11,
+    caption: 12,
+    bodySmall: 13,
+    body: 14,
+    bodyMedium: 15,
+    titleSmall: 16,
+    titleMedium: 18,
+    titleLarge: 22,
+    headline: 26,
+  },
+  fontWeights: {
+    regular: '400' as const,
+    medium: '500' as const,
+    semiBold: '600' as const,
+    bold: '700' as const,
+  },
+  lineHeights: {
+    tight: 18,
+    normal: 20,
+    relaxed: 24,
+    loose: 28,
+  },
+} as const;
+
 export const PREDEFINED_LOCATIONS = [
   {
     title: 'Технический этаж / Серверная',
@@ -114,3 +161,6 @@ export const THEME_COLORS = {
 } as const;
 
 export type ThemeColors = typeof THEME_COLORS[ThemeMode];
+export type Spacing = typeof SPACING;
+export type Radius = typeof RADIUS;
+export type Typography = typeof TYPOGRAPHY;
