@@ -107,9 +107,13 @@ export const InteractiveMapView = forwardRef<InteractiveMapViewRef, InteractiveM
       }
     };
 
-    const tileUrl = isDark
-      ? 'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
-      : 'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png';
+    const darkModeStyle = isDark
+      ? `
+        .leaflet-tile-pane {
+          filter: brightness(0.65) invert(1) contrast(2.5) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+        }
+      `
+      : '';
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -135,6 +139,7 @@ export const InteractiveMapView = forwardRef<InteractiveMapViewRef, InteractiveM
               height: 100%;
               background-color: ${colors.background};
             }
+            ${darkModeStyle}
             .leaflet-popup-content-wrapper {
               background: ${colors.surface};
               color: ${colors.textPrimary};
@@ -167,18 +172,31 @@ export const InteractiveMapView = forwardRef<InteractiveMapViewRef, InteractiveM
               margin-bottom: 8px;
             }
             .popup-btn {
-              display: block;
+              display: flex;
+              align-items: center;
+              justify-content: center;
               width: 100%;
               box-sizing: border-box;
               text-align: center;
               background-color: ${colors.primary};
               color: #ffffff;
               border: none;
-              border-radius: ${radius.sm}px;
-              padding: 8px 12px;
-              font-size: 13px;
+              border-radius: ${radius.md}px;
+              padding: 12px 16px;
+              min-height: 48px;
+              font-size: 14px;
               font-weight: 600;
               cursor: pointer;
+            }
+            .leaflet-control-attribution {
+              font-size: 10px !important;
+              background: ${isDark ? 'rgba(15, 23, 42, 0.85)' : 'rgba(255, 255, 255, 0.85)'} !important;
+              color: ${colors.textSecondary} !important;
+              padding: 2px 6px !important;
+            }
+            .leaflet-control-attribution a {
+              color: ${colors.primary} !important;
+              text-decoration: none !important;
             }
             .custom-pin {
               display: flex;
@@ -210,13 +228,13 @@ export const InteractiveMapView = forwardRef<InteractiveMapViewRef, InteractiveM
           <script>
             var map = L.map('map', {
               zoomControl: false,
-              attributionControl: false
+              attributionControl: true
             }).setView([${initialLatitude}, ${initialLongitude}], 13);
             window.leafletMap = map;
 
-            L.tileLayer('${tileUrl}', {
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
               maxZoom: 19,
-              subdomains: 'abcd'
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             }).addTo(map);
 
             var markersLayer = L.layerGroup().addTo(map);
@@ -299,6 +317,7 @@ export const InteractiveMapView = forwardRef<InteractiveMapViewRef, InteractiveM
           source={{ html: htmlContent }}
           style={styles.webView}
           onMessage={handleMessage}
+          userAgent="Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36 FieldWorkerApp/1.0"
           javaScriptEnabled
           domStorageEnabled
           scrollEnabled={false}
