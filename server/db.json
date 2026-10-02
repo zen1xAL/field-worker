@@ -47,6 +47,56 @@
       "syncStatus": "synced",
       "createdAt": "2026-10-01T15:00:00.000Z",
       "updatedAt": "2026-10-02T12:20:00.000Z"
+    },
+    {
+      "id": "task-1790981280742-bfi49",
+      "title": "Каравраоа",
+      "description": "Лплалплп",
+      "dueDate": "2026-10-04T15:00:00.000Z",
+      "status": "New",
+      "location": {
+        "address": "ул. Притыцкого, д. 29",
+        "latitude": 53.9085,
+        "longitude": 27.4862
+      },
+      "attachments": [
+        {
+          "id": "att-1790981278116-i1zf2",
+          "uri": "file:///data/user/0/host.exp.exponent/cache/ExperienceData/%2540anonymous%252Ffield-worker-app-3ec9c9d6-e535-4004-a322-298d592c0d11/ImagePicker/836fd590-1b8c-472b-8875-a88148babb88.jpeg",
+          "name": "1000070694.jpg",
+          "type": "image",
+          "size": 2294184,
+          "createdAt": "2026-10-02T22:47:58.116Z"
+        }
+      ],
+      "syncStatus": "synced",
+      "createdAt": "2026-10-02T22:48:00.742Z",
+      "updatedAt": "2026-10-02T22:48:00.742Z"
+    },
+    {
+      "id": "task-1790981318914-aaa03",
+      "title": "Аааааааав",
+      "description": "Ааааааааааав",
+      "dueDate": "2026-10-04T16:00:00.000Z",
+      "status": "New",
+      "location": {
+        "address": "ул. Козлова, д. 18",
+        "latitude": 53.9082,
+        "longitude": 27.5898
+      },
+      "attachments": [
+        {
+          "id": "att-1790981312641-l1vay",
+          "uri": "file:///data/user/0/host.exp.exponent/cache/ExperienceData/%2540anonymous%252Ffield-worker-app-3ec9c9d6-e535-4004-a322-298d592c0d11/ImagePicker/07eb6036-1d68-4464-bf28-b99a5f2d1049.jpeg",
+          "name": "1000070689.jpg",
+          "type": "image",
+          "size": 2451364,
+          "createdAt": "2026-10-02T22:48:32.641Z"
+        }
+      ],
+      "syncStatus": "synced",
+      "createdAt": "2026-10-02T22:48:38.914Z",
+      "updatedAt": "2026-10-02T22:48:38.914Z"
     }
   ]
 }
