@@ -1,9 +1,18 @@
 import { Platform } from 'react-native';
-import * as Notifications from 'expo-notifications';
+import { setNotificationHandler } from 'expo-notifications/build/NotificationsHandler';
+import {
+  getPermissionsAsync,
+  requestPermissionsAsync,
+} from 'expo-notifications/build/NotificationPermissions';
+import { setNotificationChannelAsync } from 'expo-notifications/build/setNotificationChannelAsync';
+import { AndroidImportance } from 'expo-notifications/build/NotificationChannelManager.types';
+import { scheduleNotificationAsync } from 'expo-notifications/build/scheduleNotificationAsync';
+import { cancelScheduledNotificationAsync } from 'expo-notifications/build/cancelScheduledNotificationAsync';
+import { SchedulableTriggerInputTypes } from 'expo-notifications/build/Notifications.types';
 import { NOTIFICATION_CONFIG } from '@/constants';
 import { Task } from '@/types';
 
-Notifications.setNotificationHandler({
+setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
     shouldPlaySound: true,
@@ -22,11 +31,11 @@ export class NotificationService {
     }
 
     try {
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      const { status: existingStatus } = await getPermissionsAsync();
       let finalStatus = existingStatus;
 
       if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
+        const { status } = await requestPermissionsAsync();
         finalStatus = status;
       }
 
@@ -35,9 +44,9 @@ export class NotificationService {
       }
 
       if (Platform.OS === 'android') {
-        await Notifications.setNotificationChannelAsync(NOTIFICATION_CONFIG.CHANNEL_ID, {
+        await setNotificationChannelAsync(NOTIFICATION_CONFIG.CHANNEL_ID, {
           name: NOTIFICATION_CONFIG.CHANNEL_NAME,
-          importance: Notifications.AndroidImportance.HIGH,
+          importance: AndroidImportance.HIGH,
           vibrationPattern: [0, 250, 250, 250],
           lightColor: '#2563EB',
           sound: 'default',
@@ -74,7 +83,7 @@ export class NotificationService {
         }
       }
 
-      const notificationId = await Notifications.scheduleNotificationAsync({
+      const notificationId = await scheduleNotificationAsync({
         content: {
           title: `Напоминание о выезде: ${task.title}`,
           body: `Объект: ${task.location.address}. Дедлайн приближается!`,
@@ -82,7 +91,7 @@ export class NotificationService {
           sound: 'default',
         },
         trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+          type: SchedulableTriggerInputTypes.TIME_INTERVAL,
           seconds: delaySeconds,
         },
       });
@@ -97,14 +106,14 @@ export class NotificationService {
     try {
       await this.initialize();
 
-      const notificationId = await Notifications.scheduleNotificationAsync({
+      const notificationId = await scheduleNotificationAsync({
         content: {
           title: `[ДЕМО 30с] Напоминание по задаче`,
           body: `Наряд: «${taskTitle}». Проверка доставки локального уведомления.`,
           sound: 'default',
         },
         trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+          type: SchedulableTriggerInputTypes.TIME_INTERVAL,
           seconds: NOTIFICATION_CONFIG.DEMO_DELAY_SECONDS,
         },
       });
@@ -117,7 +126,7 @@ export class NotificationService {
 
   public static async cancelReminder(notificationId: string): Promise<void> {
     try {
-      await Notifications.cancelScheduledNotificationAsync(notificationId);
+      await cancelScheduledNotificationAsync(notificationId);
     } catch {
       return;
     }
