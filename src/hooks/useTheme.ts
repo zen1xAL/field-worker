@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleTheme, setThemeMode } from '@/store/slices/themeSlice';
-import { THEME_COLORS, ThemeColors, SPACING, RADIUS, TYPOGRAPHY } from '@/constants';
+import { THEME_COLORS, ThemeColors, SPACING, RADIUS, TYPOGRAPHY, LAYOUT } from '@/constants';
 import { ThemeMode } from '@/types';
 
 export const useTheme = () => {
@@ -24,6 +24,7 @@ export const useTheme = () => {
     spacing: SPACING,
     radius: RADIUS,
     typography: TYPOGRAPHY,
+    layout: LAYOUT,
     toggleTheme: handleToggle,
     setThemeMode: handleSetMode,
   };

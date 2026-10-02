@@ -44,6 +44,16 @@ export const RADIUS = {
   full: 9999,
 } as const;
 
+export const LAYOUT = {
+  minTapTarget: 48,
+  iconSmall: 16,
+  iconMedium: 22,
+  iconLarge: 28,
+  iconHero: 48,
+  tabBarHeight: 60,
+  headerHeight: 56,
+} as const;
+
 export const TYPOGRAPHY = {
   fontSizes: {
     captionSmall: 11,
@@ -164,3 +174,4 @@ export type ThemeColors = typeof THEME_COLORS[ThemeMode];
 export type Spacing = typeof SPACING;
 export type Radius = typeof RADIUS;
 export type Typography = typeof TYPOGRAPHY;
+export type Layout = typeof LAYOUT;
