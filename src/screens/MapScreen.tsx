@@ -1,13 +1,11 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Platform,
 } from 'react-native';
-import MapView, { Marker, Callout, Region, UrlTile } from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,7 +16,10 @@ import { RootStackParamList } from '@/navigation/types';
 import { DEFAULT_MAP_REGION } from '@/constants';
 import { Task, TaskStatus } from '@/types';
 import { ScreenHeader } from '@/components/UI/ScreenHeader';
-import { MapCalloutCard } from '@/components/Features/MapCalloutCard';
+import {
+  InteractiveMapView,
+  InteractiveMapViewRef,
+} from '@/components/Features/InteractiveMapView';
 
 type MapFilterStatus = TaskStatus | 'All';
 
@@ -35,9 +36,9 @@ const FILTER_OPTIONS: FilterOptionItem[] = [
 ];
 
 export const MapScreen = () => {
-  const { colors, isDark, spacing, typography, layout, radius } = useTheme();
+  const { colors, spacing, typography, layout, radius } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const mapRef = useRef<MapView | null>(null);
+  const mapRef = useRef<InteractiveMapViewRef | null>(null);
 
   const allTasks = useAppSelector(selectTasksItems);
   const [filter, setFilter] = useState<MapFilterStatus>('All');
@@ -71,50 +72,13 @@ export const MapScreen = () => {
 
   const latestTaskWithCoords = totalTasksWithCoords[0];
 
-  const initialRegion: Region = latestTaskWithCoords
-    ? {
-        latitude: latestTaskWithCoords.location.latitude,
-        longitude: latestTaskWithCoords.location.longitude,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-      }
-    : {
-        latitude: DEFAULT_MAP_REGION.latitude,
-        longitude: DEFAULT_MAP_REGION.longitude,
-        latitudeDelta: DEFAULT_MAP_REGION.latitudeDelta,
-        longitudeDelta: DEFAULT_MAP_REGION.longitudeDelta,
-      };
+  const initialLatitude = latestTaskWithCoords
+    ? latestTaskWithCoords.location.latitude
+    : DEFAULT_MAP_REGION.latitude;
 
-  useEffect(() => {
-    if (tasksWithCoords.length > 0 && mapRef.current) {
-      const coords = tasksWithCoords.map((task) => ({
-        latitude: task.location.latitude,
-        longitude: task.location.longitude,
-      }));
-      mapRef.current.fitToCoordinates(coords, {
-        edgePadding: {
-          top: layout.minTapTarget + spacing.lg,
-          right: spacing.xl,
-          bottom: layout.minTapTarget + spacing.lg,
-          left: spacing.xl,
-        },
-        animated: true,
-      });
-    }
-  }, [tasksWithCoords.length, filter]);
-
-  const getMarkerPinColor = (status: TaskStatus): string => {
-    switch (status) {
-      case 'New':
-        return colors.statusNew;
-      case 'In Progress':
-        return colors.statusInProgress;
-      case 'Completed':
-        return colors.statusCompleted;
-      case 'Cancelled':
-        return colors.statusCancelled;
-    }
-  };
+  const initialLongitude = latestTaskWithCoords
+    ? latestTaskWithCoords.location.longitude
+    : DEFAULT_MAP_REGION.longitude;
 
   const handleCenterMap = () => {
     if (!mapRef.current) {
@@ -125,21 +89,13 @@ export const MapScreen = () => {
         latitude: task.location.latitude,
         longitude: task.location.longitude,
       }));
-      mapRef.current.fitToCoordinates(coords, {
-        edgePadding: {
-          top: layout.minTapTarget + spacing.lg,
-          right: spacing.xl,
-          bottom: layout.minTapTarget + spacing.lg,
-          left: spacing.xl,
-        },
-        animated: true,
-      });
+      mapRef.current.centerOnCoordinates(coords);
     } else {
-      mapRef.current.animateToRegion(initialRegion, 500);
+      mapRef.current.resetView(initialLatitude, initialLongitude);
     }
   };
 
-  const handleCalloutPress = (taskId: string) => {
+  const handleOpenTask = (taskId: string) => {
     navigation.navigate('TaskDetail', { taskId });
   };
 
@@ -222,43 +178,13 @@ export const MapScreen = () => {
       </View>
 
       <View style={styles.mapContainer}>
-        <MapView
+        <InteractiveMapView
           ref={mapRef}
-          style={styles.map}
-          mapType={Platform.OS === 'android' ? 'none' : 'standard'}
-          initialRegion={initialRegion}
-          showsCompass
-          showsScale
-        >
-          <UrlTile
-            key={isDark ? 'dark-carto' : 'light-carto'}
-            urlTemplate={
-              isDark
-                ? 'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
-                : 'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png'
-            }
-            maximumZ={19}
-            flipY={false}
-            zIndex={1}
-            tileSize={256}
-          />
-          {tasksWithCoords.map((task) => (
-            <Marker
-              key={task.id}
-              coordinate={{
-                latitude: task.location.latitude,
-                longitude: task.location.longitude,
-              }}
-              pinColor={getMarkerPinColor(task.status)}
-              title={task.title}
-              description={task.location.address}
-            >
-              <Callout tooltip onPress={() => handleCalloutPress(task.id)}>
-                <MapCalloutCard task={task} />
-              </Callout>
-            </Marker>
-          ))}
-        </MapView>
+          tasks={tasksWithCoords}
+          onSelectTask={handleOpenTask}
+          initialLatitude={initialLatitude}
+          initialLongitude={initialLongitude}
+        />
 
         {tasksWithCoords.length === 0 && (
           <TouchableOpacity
@@ -326,9 +252,6 @@ const styles = StyleSheet.create({
   mapContainer: {
     flex: 1,
     position: 'relative',
-  },
-  map: {
-    ...StyleSheet.absoluteFill,
   },
   floatingEmptyBanner: {
     position: 'absolute',
