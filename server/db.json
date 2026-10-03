@@ -20,7 +20,7 @@
       "id": "task-sample-2",
       "title": "Диагностика распределительного щита ЩР-3",
       "description": "Периодическое срабатывание УЗО группы вентиляции. Проверить сопротивление изоляции кабельных линий.",
-      "dueDate": "2026-10-03T14:30:00.000Z",
+      "dueDate": "2026-10-04T15:00:00.000Z",
       "status": "In Progress",
       "location": {
         "address": "пр. Победителей, д. 103, Электрощитовая 1",
@@ -30,7 +30,7 @@
       "attachments": [],
       "syncStatus": "synced",
       "createdAt": "2026-10-02T09:15:00.000Z",
-      "updatedAt": "2026-10-02T11:00:00.000Z"
+      "updatedAt": "2026-10-03T15:42:28.908Z"
     },
     {
       "id": "task-sample-3",
@@ -59,26 +59,17 @@
         "latitude": 53.9085,
         "longitude": 27.4862
       },
-      "attachments": [
-        {
-          "id": "att-1790981278116-i1zf2",
-          "uri": "file:///data/user/0/host.exp.exponent/cache/ExperienceData/%2540anonymous%252Ffield-worker-app-3ec9c9d6-e535-4004-a322-298d592c0d11/ImagePicker/836fd590-1b8c-472b-8875-a88148babb88.jpeg",
-          "name": "1000070694.jpg",
-          "type": "image",
-          "size": 2294184,
-          "createdAt": "2026-10-02T22:47:58.116Z"
-        }
-      ],
+      "attachments": [],
       "syncStatus": "synced",
       "createdAt": "2026-10-02T22:48:00.742Z",
-      "updatedAt": "2026-10-02T22:48:00.742Z"
+      "updatedAt": "2026-10-03T15:22:58.345Z"
     },
     {
       "id": "task-1790981318914-aaa03",
       "title": "Аааааааав",
       "description": "Ааааааааааав",
       "dueDate": "2026-10-04T16:00:00.000Z",
-      "status": "New",
+      "status": "Cancelled",
       "location": {
         "address": "ул. Козлова, д. 18",
         "latitude": 53.9082,
@@ -96,7 +87,57 @@
       ],
       "syncStatus": "synced",
       "createdAt": "2026-10-02T22:48:38.914Z",
-      "updatedAt": "2026-10-02T22:48:38.914Z"
+      "updatedAt": "2026-10-03T15:23:43.857Z"
+    },
+    {
+      "id": "task-1791042430972-wjqca",
+      "title": "Диагностика",
+      "description": "Ашоаокгкгкшкгег",
+      "dueDate": "2026-10-04T15:00:00.000Z",
+      "status": "New",
+      "location": {
+        "address": "ул. Ленина, д. 45, корп. 2",
+        "latitude": 53.9006,
+        "longitude": 27.559
+      },
+      "attachments": [
+        {
+          "id": "att-1791042429613-c3zex",
+          "uri": "file:///data/user/0/host.exp.exponent/cache/ExperienceData/%2540zen1xal%252Ffield-worker-app/ImagePicker/79bec2c4-b1f6-4079-8552-a1067ddf9cc8.jpeg",
+          "name": "1000070774.jpg",
+          "type": "image",
+          "size": 1267274,
+          "createdAt": "2026-10-03T15:47:09.613Z"
+        }
+      ],
+      "syncStatus": "synced",
+      "createdAt": "2026-10-03T15:47:10.972Z",
+      "updatedAt": "2026-10-03T15:47:10.972Z"
+    },
+    {
+      "id": "task-1791042544286-vzctz",
+      "title": "Задача",
+      "description": "Оаоегегкшешегег",
+      "dueDate": "2026-10-04T06:00:00.000Z",
+      "status": "New",
+      "location": {
+        "address": "пр. Победителей, д. 103",
+        "latitude": 53.9312,
+        "longitude": 27.493
+      },
+      "attachments": [
+        {
+          "id": "att-1791042541940-m5eae",
+          "uri": "file:///data/user/0/host.exp.exponent/cache/ExperienceData/%2540zen1xal%252Ffield-worker-app/ImagePicker/7d3e8670-b4f4-45e6-bd3b-c21b2cfc95e7.jpeg",
+          "name": "1000070773.jpg",
+          "type": "image",
+          "size": 269556,
+          "createdAt": "2026-10-03T15:49:01.940Z"
+        }
+      ],
+      "syncStatus": "synced",
+      "createdAt": "2026-10-03T15:49:04.286Z",
+      "updatedAt": "2026-10-03T15:49:04.286Z"
     }
   ]
 }
