@@ -1,6 +1,8 @@
 import { SyncStatus, TaskStatus, ThemeMode } from '@/types';
 
 export const CANDIDATE_CODE = 'SA-RN-2026-X1';
+export const APP_VERSION = '1.0.0';
+export const APP_BUILD_NUMBER = '1';
 
 export const STORAGE_KEYS = {
   TASKS: '@field_worker/tasks',

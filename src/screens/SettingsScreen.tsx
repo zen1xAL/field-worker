@@ -11,7 +11,13 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
 import { useSyncQueue } from '@/hooks/useSyncQueue';
-import { CANDIDATE_CODE, DEFAULT_SERVER_URL, NETWORK_STATUS_LABELS } from '@/constants';
+import {
+  CANDIDATE_CODE,
+  DEFAULT_SERVER_URL,
+  NETWORK_STATUS_LABELS,
+  APP_VERSION,
+  APP_BUILD_NUMBER,
+} from '@/constants';
 import { NotificationService } from '@/services/notificationService';
 import { formatTaskDateTime } from '@/utils/dateTime';
 import { ScreenHeader, AppCard, AppBadge, AppButton, AppInput } from '@/components/UI';
@@ -111,7 +117,7 @@ export const SettingsScreen = () => {
               },
             ]}
           >
-            ИДЕНТИФИКАЦИЯ КАНДИДАТА
+            О ПРИЛОЖЕНИИ И КАНДИДАТЕ
           </Text>
           <View style={styles.row}>
             <View style={styles.rowInfo}>
@@ -144,6 +150,41 @@ export const SettingsScreen = () => {
               </View>
             </View>
             <AppBadge label={CANDIDATE_CODE} variant="primary" />
+          </View>
+
+          <View style={[styles.divider, { backgroundColor: colors.border, marginVertical: spacing.md }]} />
+
+          <View style={styles.row}>
+            <View style={styles.rowInfo}>
+              <Ionicons name="information-circle-outline" size={22} color={colors.primary} />
+              <View style={[styles.rowTextGroup, { marginLeft: spacing.md }]}>
+                <Text
+                  style={[
+                    styles.rowLabel,
+                    {
+                      color: colors.textPrimary,
+                      fontSize: typography.fontSizes.bodyMedium,
+                      fontWeight: typography.fontWeights.semiBold,
+                    },
+                  ]}
+                >
+                  Версия приложения
+                </Text>
+                <Text
+                  style={[
+                    styles.rowDescription,
+                    {
+                      color: colors.textSecondary,
+                      fontSize: typography.fontSizes.caption,
+                      marginTop: spacing.xs / 2,
+                    },
+                  ]}
+                >
+                  {`Сборка ${APP_BUILD_NUMBER} • Релизный APK (EAS)`}
+                </Text>
+              </View>
+            </View>
+            <AppBadge label={`v${APP_VERSION}`} variant="neutral" />
           </View>
         </AppCard>
 
